@@ -2,7 +2,7 @@
 
 unsigned long milliSeconds;
 unsigned long microSeconds;
-int counter;
+int counter =25;
 
 
 ISR(TIMER1_COMPA_vect){
@@ -38,6 +38,18 @@ void print(char byte){
   while (!(UCSR0A & (1 << UDRE0)));
   // put data into buffer, sends the data
   UDR0 = byte;
+}
+
+void printInt(int x) {
+  
+  char buffer[20]; 
+  itoa(x, buffer, 10); 
+
+  // print each character
+  for (int i = 0; buffer[i] != '\0'; i++) {
+    print(buffer[i]);
+  }
+  print('\n'); //print new line
 }
 
 void setup_uart(){
@@ -106,12 +118,12 @@ void setup() {
 void loop() {
 
   PORTB |= (1<<5);
-  print('H');
+  printInt(counter);
   delay_us(1000000);
   
   PORTB &= ~(1<<5);
   
-  print('L');
   delay_us(1000000);
+
    
 }

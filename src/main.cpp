@@ -2,6 +2,54 @@
 
 unsigned long milliSeconds;
 unsigned long microSeconds;
+int counter;
+
+
+ISR(TIMER1_COMPA_vect){
+  milliSeconds++; // Increment milliseconds counter
+}
+ISR(TIMER0_COMPA_vect) {
+  microSeconds++; // Increment microseconds counter
+}
+
+void delay_ms(unsigned long ms){
+  unsigned long current_ms = milliSeconds;
+  while(true){
+    if(milliSeconds - current_ms >= ms){
+      break;
+    }
+    asm("nop");
+  }
+}
+
+void delay_us(unsigned long us){
+  unsigned long current_us = microSeconds;
+  while(true){
+    if(microSeconds - current_us >= us){
+      break;
+    }
+    asm("nop");
+  }
+}
+
+
+void print(char byte){
+  // wait for empty transmit buffer
+  while (!(UCSR0A & (1 << UDRE0)));
+  // put data into buffer, sends the data
+  UDR0 = byte;
+}
+
+void setup_uart(){
+  // set baud rate to 9600
+  UBRR0H = 0;
+  UBRR0L = 103;
+  // enable receiver and transmitter
+  UCSR0B = (1 << RXEN0) | (1 << TXEN0);
+  // set frame format: 8data, 1stop bit
+  UCSR0C = (1 << UCSZ01) | (1 << UCSZ00);
+}
+
 
 void setup() {
   DDRB = 0;
@@ -48,43 +96,22 @@ void setup() {
   TCCR0B |= (1 << CS00); // Start Timer0 with no prescaler
   TIMSK0 |= (1 << OCIE0A); // Enable CTC interrupt
 
-  sei(); //enable glpbal interruptd
+  sei(); //enable glpbal interrupts
+
+  // configure UART
+  setup_uart();
 
 }
-
-ISR(TIMER1_COMPA_vect){
-  milliSeconds++; // Increment milliseconds counter
-}
-ISR(TIMER0_COMPA_vect) {
-  microSeconds++; // Increment microseconds counter
-}
-
-void delay_ms(unsigned long ms){
-  unsigned long current_ms = milliSeconds;
-  while(true){
-    if(milliSeconds - current_ms >= ms){
-      break;
-    }
-    asm("nop");
-  }
-}
-
-void delay_us(unsigned long us){
-  unsigned long current_us = microSeconds;
-  while(true){
-    if(microSeconds - current_us >= us){
-      break;
-    }
-    asm("nop");
-  }
-}
-
 
 void loop() {
 
   PORTB |= (1<<5);
+  print('H');
   delay_us(1000000);
+  
   PORTB &= ~(1<<5);
+  
+  print('L');
   delay_us(1000000);
    
 }

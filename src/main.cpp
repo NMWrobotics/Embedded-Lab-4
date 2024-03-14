@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
-unsigned long milliSeconds;
-unsigned long microSeconds;
+unsigned long milliSeconds = 0;
+unsigned long microSeconds = 0;
 int counter = 0; //counter that increment
 
 ISR(TIMER1_COMPA_vect){
@@ -90,21 +90,21 @@ void setup() {
   OCR1A = (16,000,000/(1024*1000)) - 1 = 14.625
   lets choose 64 as the pre scalar then OCR1A = 249 */
   OCR1A = 249;
-  TCCR1B |= (1 << WGM12); //ctc mode
-  TCCR1B |= (1 << CS10) | (1 << CS11); // set prescalar
-  TIMSK1 |= ( 1 << OCIE1A); //match A interrupt enable
+  TCCR1B |= (1 << WGM12); // Configure Timer1 for CTC mode
+  TCCR1B |= (1 << CS10) | (1 << CS11); // set prescalar 64
+  TIMSK1 |= ( 1 << OCIE1A); //match CTC interrupt enable
   
 
 /*   set Timer 0 for count microseconds
   calculating OCR0A
-  1us 1MHz
+  1us = 1MHz
   OCR0A = (16,000,000/(pre scalar*1,000,000)) - 1 
   OCR0A = (16,000,000/(1*1,000,000)) - 1 = 15
   OCR0A = (16,000,000/(8*1,000,000)) - 1 = 1
   OCR0A = (16,000,000/(64*1,000,000)) - 1 = -0.75
   OCR0A = (16,000,000/(256*1,000,000)) - 1 = -0.9375
   OCR0A = (16,000,000/(1024*1,000,000)) - 1 = -0.984375
-  lets choose 8 as the pre scalar then OCR2A = 1 */
+  lets choose 8 as the pre scalar then OCR0A = 1 */
   OCR0A = 15;
   TCCR0A |= (1 << WGM01); // Configure Timer0 for CTC mode
   TCCR0B |= (1 << CS00); // Start Timer0 with no prescaler
@@ -112,8 +112,7 @@ void setup() {
 
   sei(); //enable glpbal interrupts
 
-  // configure UART
-  setup_uart();
+  setup_uart();// configure UART
 
 }
 
